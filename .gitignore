@@ -1,0 +1,23 @@
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Julia temporary/cache files
+*.ji
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+
+# Large SDR captures / generated data
+*.iq
+*.bin
