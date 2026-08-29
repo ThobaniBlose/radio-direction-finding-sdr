@@ -21,3 +21,8 @@ Thumbs.db
 # Large SDR captures / generated data
 *.iq
 *.bin
+
+# STM32CubeIDE build output
+Debug/
+Release/
+*.launch
