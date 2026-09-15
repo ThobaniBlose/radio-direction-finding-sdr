@@ -44,6 +44,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+uint8_t command;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,28 +92,57 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  /* Default HMC7992 RF path: RFC -> RF1 (A = 0, B = 0). */
+  HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* Select HMC435 OUT1 */
-    HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_RESET);
-
-    HAL_Delay(1000);
-
-    /* Select HMC435 OUT2 */
-    HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_SET);
-
-    HAL_Delay(1000);
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    /* Wait for one command byte from the PC. */
+    HAL_UART_Receive(&huart2, &command, 1, HAL_MAX_DELAY);
+
+    if (command == '1')
+    {
+      /* RF1: A = 0, B = 0. */
+      HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_RESET);
+
+      uint8_t message[] = "READY 1\r\n";
+      HAL_UART_Transmit(&huart2, message, sizeof(message) - 1, HAL_MAX_DELAY);
+    }
+    else if (command == '2')
+    {
+      /* RF2: A = 1, B = 0. */
+      HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_RESET);
+
+      uint8_t message[] = "READY 2\r\n";
+      HAL_UART_Transmit(&huart2, message, sizeof(message) - 1, HAL_MAX_DELAY);
+    }
+    else if (command == '3')
+    {
+      /* RF3: A = 0, B = 1. */
+      HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_SET);
+
+      uint8_t message[] = "READY 3\r\n";
+      HAL_UART_Transmit(&huart2, message, sizeof(message) - 1, HAL_MAX_DELAY);
+    }
+    else if (command == '4')
+    {
+      /* RF4: A = 1, B = 1. */
+      HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_SET);
+
+      uint8_t message[] = "READY 4\r\n";
+      HAL_UART_Transmit(&huart2, message, sizeof(message) - 1, HAL_MAX_DELAY);
+    }
   }
   /* USER CODE END 3 */
 }
@@ -229,7 +260,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(SW_A_GPIO_Port, SW_A_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SW_B_GPIO_Port, SW_B_Pin, GPIO_PIN_RESET);
